@@ -15,6 +15,7 @@ class TrimSlider extends StatefulWidget {
     this.quality = 10,
     this.horizontalMargin = 0.0,
     this.child,
+    this.showTrim = true,
   }) : super(key: key);
 
   /// The [controller] param is mandatory so every change in the controller settings will propagate in the trim slider view
@@ -32,6 +33,8 @@ class TrimSlider extends StatefulWidget {
 
   /// The [child] param can be specify to display a widget below this one (e.g: [TrimTimeline])
   final Widget? child;
+
+  final bool showTrim;
 
   @override
   State<TrimSlider> createState() => _TrimSliderState();
@@ -74,6 +77,11 @@ class _TrimSliderState extends State<TrimSlider>
     final double progressTrim = _getTrimPosition();
     final List<double> minMargin = [min - margin, min + margin];
     final List<double> maxMargin = [max - margin, max + margin];
+
+    if (!widget.showTrim) {
+      _boundary.value = _TrimBoundaries.progress;
+      return;
+    }
 
     //IS TOUCHING THE GRID
     if (pos >= minMargin[0] && pos <= maxMargin[1]) {
@@ -229,10 +237,9 @@ class _TrimSliderState extends State<TrimSlider>
     super.build(context);
     return LayoutBuilder(builder: (_, contrainst) {
       final Size trimLayout = Size(
-          contrainst.maxWidth - widget.horizontalMargin * 2,
-          contrainst.maxHeight);
-      final Size fullLayout = Size(
-          trimLayout.width * (_ratio! > 1 ? _ratio! : 1), contrainst.maxHeight);
+          contrainst.maxWidth - widget.horizontalMargin * 2, widget.height);
+      final Size fullLayout =
+          Size(trimLayout.width * (_ratio! > 1 ? _ratio! : 1), widget.height);
       _fullLayout = fullLayout;
       if (_trimLayout != trimLayout) {
         _trimLayout = trimLayout;
@@ -241,6 +248,7 @@ class _TrimSliderState extends State<TrimSlider>
 
       return SizedBox(
           width: _fullLayout.width,
+          height: widget.height,
           child: Stack(children: [
             NotificationListener<ScrollNotification>(
               child: SingleChildScrollView(
@@ -287,6 +295,7 @@ class _TrimSliderState extends State<TrimSlider>
                       _rect,
                       _getTrimPosition(),
                       widget.controller.trimStyle,
+                      widget.showTrim,
                     ),
                   );
                 },
